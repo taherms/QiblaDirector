@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qibla Compass — Find the direction to the Kaaba</title>
+<meta name="description" content="Get your exact Qibla direction — the great-circle bearing to the Kaaba in Mecca — with the full spherical-trigonometry calculation and a rotating globe.">
+<meta name="theme-color" content="#0E4B3B">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%230E4B3B'/%3E%3Cpath d='M50 18 L58 42 L83 42 L62 57 L70 82 L50 66 L30 82 L38 57 L17 42 L42 42 Z' fill='%23C29A3B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  /* ---------- Design tokens ---------- */
+  :root{
+    --cream:        #F3ECD8;
+    --cream-deep:   #E9DEBE;
+    --parchment:    #FBF7EC;
+    --green:        #0E4B3B;
+    --green-deep:   #082E24;
+    --gold:         #B4862F;
+    --gold-light:   #D9AE5C;
+    --ink:          #221C10;
+    --ink-soft:     #4A4030;
+    --maroon:       #7A2E2E;
+    --line:         rgba(34,28,16,0.14);
+    --shadow:       0 10px 30px rgba(14,75,59,0.16);
+    --font-display: 'Amiri', 'Georgia', serif;
+    --font-body:    'Cairo', 'Segoe UI', sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin: 0;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(180,134,47,0.16) 1px, transparent 1.6px);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a{ color: var(--green); }
+
+  .wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 18px 56px;
+  }
+
+  /* ---------- Ornamental frieze ---------- */
+  .frieze{
+    height: 13px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='13' viewBox='0 0 26 13'%3E%3Cpath d='M0 6.5 L6.5 0 L13 6.5 L6.5 13 Z M13 6.5 L19.5 0 L26 6.5 L19.5 13 Z' fill='%23D9AE5C'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 26px 13px;
+  }
+  .frieze.dark{
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='13' viewBox='0 0 26 13'%3E%3Cpath d='M0 6.5 L6.5 0 L13 6.5 L6.5 13 Z M13 6.5 L19.5 0 L26 6.5 L19.5 13 Z' fill='%230E4B3B'/%3E%3C/svg%3E");
+    opacity: 0.55;
+  }
+
+  /* ---------- Header ---------- */
+  header.hero{
+    background: linear-gradient(180deg, var(--green) 0%, var(--green-deep) 100%);
+    color: var(--cream);
+    text-align: center;
+    padding: 30px 20px 26px;
+  }
+  header.hero h1{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 2.7rem);
+    margin: 0 0 2px;
+    letter-spacing: 0.01em;
+    color: var(--gold-light);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  }
+  header.hero .arabic{
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--cream);
+    opacity: 0.9;
+    margin: 0 0 12px;
+  }
+  header.hero p{
+    max-width: 46ch;
+    margin: 0 auto;
+    font-size: 0.98rem;
+    color: rgba(243,236,216,0.85);
+  }
+
+  /* ---------- Panels (mihrab-niche motif: wide arch top, quiet square base) ---------- */
+  main{ margin-top: -1px; }
+  .panel{
+    background: var(--parchment);
+    border: 1px solid var(--line);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 22px 22px 26px;
+    margin-top: 22px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .panel::before{
+    content: "";
+    display: block;
+    position: absolute;
+    left: -1px; right: -1px; top: -34px;
+    height: 34px;
+    background: var(--parchment);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    border-radius: 60px 60px 0 0;
+  }
+  .panel-inner{ position: relative; z-index: 1; }
+  .panel h2{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--green);
+    margin: 0 0 4px;
+  }
+  .panel .lede{
+    margin: 0 0 18px;
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+    max-width: 62ch;
+  }
+
+  /* ---------- Location panel ---------- */
+  .loc-row{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 20px;
+  }
+  .loc-info{ flex: 1 1 240px; min-width: 0; }
+  .loc-label{ font-weight: 600; color: var(--ink); }
+  .loc-coords{
+    font-family: 'Cairo', monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  button, .btn{
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 22px;
+    cursor: pointer;
+    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    color: var(--green-deep);
+    box-shadow: 0 3px 0 rgba(120,88,26,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+  button:hover{ transform: translateY(-1px); box-shadow: 0 4px 0 rgba(120,88,26,0.5); }
+  button:active{ transform: translateY(1px); box-shadow: 0 2px 0 rgba(120,88,26,0.5); }
+  button.secondary{
+    background: transparent;
+    color: var(--green);
+    box-shadow: none;
+    border: 1.5px solid var(--green);
+    padding: 10px 20px;
+  }
+  button.secondary:hover{ background: rgba(14,75,59,0.06); }
+
+  :focus-visible{ outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  #status{
+    margin: 14px 0 0;
+    font-size: 0.9rem;
+    min-height: 1.3em;
+  }
+  #status[data-tone="error"]{ color: var(--maroon); }
+  #status[data-tone="success"]{ color: var(--green); }
+  #status[data-tone="info"]{ color: var(--ink-soft); }
+  #status:empty{ display: none; }
+
+  details.manual{
+    margin-top: 18px;
+    border-top: 1px dashed var(--line);
+    padding-top: 14px;
+  }
+  details.manual summary{
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--green);
+    font-size: 0.92rem;
+  }
+  .manual-fields{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    align-items: end;
+  }
+  .field{ display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; color: var(--ink-soft); }
+  .field input{
+    font-family: 'Cairo', monospace;
+    font-size: 0.95rem;
+    padding: 9px 11px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    width: 150px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .field input:focus{ border-color: var(--gold); }
+
+  /* ---------- Compass hero ---------- */
+  .compass-panel{ text-align: center; }
+  .compass-wrap{
+    max-width: 300px;
+    margin: 4px auto 10px;
+  }
+  #needle{ transition: transform 0.9s cubic-bezier(0.34, 1.2, 0.4, 1); transform-origin: 120px 120px; }
+  .bearing-value{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.6rem, 9vw, 3.4rem);
+    color: var(--green);
+    margin: 6px 0 0;
+    line-height: 1;
+  }
+  .bearing-value sup{ font-size: 0.5em; }
+  .bearing-sub{ color: var(--ink-soft); font-size: 0.95rem; margin: 6px 0 0; }
+  .bearing-sub strong{ color: var(--maroon); font-weight: 700; }
+
+  /* ---------- Calculation ---------- */
+  details.calc{ }
+  details.calc summary{
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--green);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  details.calc summary::-webkit-details-marker{ display: none; }
+  details.calc summary::before{
+    content: "▸";
+    color: var(--gold);
+    transition: transform 0.2s ease;
+    display: inline-block;
+  }
+  details.calc[open] summary::before{ transform: rotate(90deg); }
+  .calc-steps{ margin-top: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .calc-step{
+    border-left: 3px solid var(--gold);
+    padding: 2px 0 2px 14px;
+  }
+  .calc-step .step-title{
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.94rem;
+    margin: 0 0 4px;
+  }
+  .calc-step .step-text{ font-size: 0.9rem; color: var(--ink-soft); margin: 0 0 6px; }
+  .calc-step code{
+    display: block;
+    font-family: 'Courier New', monospace;
+    font-size: 0.86rem;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--green-deep);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .calc-result{
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .calc-result strong{ color: var(--green); }
+
+  /* ---------- Globe ---------- */
+  .globe-panel .lede{ margin-bottom: 8px; }
+  #globe{
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 1 / 1;
+    margin: 6px auto 4px;
+    cursor: grab;
+    touch-action: none;
+  }
+  #globe:active{ cursor: grabbing; }
+  .globe-sphere{ fill: var(--cream); stroke: var(--gold); stroke-width: 1.5; }
+  .globe-graticule{ fill: none; stroke: var(--gold); stroke-opacity: 0.28; stroke-width: 0.6; }
+  .globe-land{ fill: var(--green); fill-opacity: 0.85; stroke: var(--green-deep); stroke-width: 0.4; }
+  .globe-arc{ fill: none; stroke: var(--maroon); stroke-width: 2; stroke-dasharray: 1 3.4; stroke-linecap: round; }
+  .globe-user-dot{ fill: var(--maroon); stroke: var(--parchment); stroke-width: 1.4; }
+  .globe-mecca-star{ fill: var(--gold); stroke: var(--green-deep); stroke-width: 0.6; }
+  .globe-hint{ font-size: 0.82rem; color: var(--ink-soft); text-align: center; margin: 4px 0 0; }
+
+  /* ---------- Compass face/needle (classes, not inline var() attrs, for broad SVG support) ---------- */
+  .compass-face{ fill: var(--parchment); stroke: var(--gold); stroke-width: 2; }
+  .compass-ring{ fill: none; stroke: var(--gold); stroke-opacity: 0.5; stroke-width: 1; }
+  .needle-head{ fill: var(--gold); stroke: var(--green-deep); stroke-width: 1; }
+  .needle-tail{ fill: var(--green); stroke: var(--green-deep); stroke-width: 1; }
+  .needle-hub{ fill: var(--parchment); stroke: var(--gold); stroke-width: 2.5; }
+  .tick-major{ stroke: var(--gold); stroke-width: 1.6; stroke-opacity: 0.9; }
+  .tick-minor{ stroke: var(--gold); stroke-width: 0.8; stroke-opacity: 0.45; }
+  .tick-label{ fill: var(--green); font-family: 'Amiri', serif; font-weight: 700; font-size: 17px; text-anchor: middle; }
+
+  /* ---------- Two-up layout on wider screens ---------- */
+  .grid-two{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  @media (min-width: 780px){
+    .grid-two{ grid-template-columns: 1fr 1fr; }
+    .grid-two .panel{ margin-top: 0; }
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    text-align: center;
+    margin-top: 34px;
+    padding: 0 12px;
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+  }
+  footer p{ max-width: 58ch; margin: 6px auto; }
+  footer .kaaba-coord{ font-family: monospace; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    #needle{ transition: none !important; }
+    button{ transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frieze"></div>
+<header class="hero">
+  <h1>Qibla Compass</h1>
+  <p class="arabic">القبلة</p>
+  <p>Find the exact direction to the Kaaba in Mecca from anywhere on Earth, with the full calculation shown.</p>
+</header>
+<div class="frieze dark"></div>
+
+<div class="wrap">
+  <main>
+
+    <!-- LOCATION -->
+    <section class="panel">
+      <div class="panel-inner">
+        <h2>Your location</h2>
+        <p class="lede">Qibla changes with where you're standing. Use your device's location, or enter coordinates by hand.</p>
+
+        <div class="loc-row">
+          <div class="loc-info">
+            <div class="loc-label" id="location-label">—</div>
+            <div class="loc-coords" id="location-coords">—</div>
+          </div>
+          <button id="locate-btn" type="button">📍 Use my location</button>
+        </div>
+
+        <p id="status" role="status" aria-live="polite"></p>
+
+        <details class="manual">
+          <summary>Enter coordinates manually</summary>
+          <form class="manual-fields" id="manual-form">
+            <div class="field">
+              <label for="manual-lat">Latitude</label>
+              <input type="number" id="manual-lat" step="0.0001" min="-90" max="90" placeholder="19.0760" required>
+            </div>
+            <div class="field">
+              <label for="manual-lon">Longitude</label>
+              <input type="number" id="manual-lon" step="0.0001" min="-180" max="180" placeholder="72.8777" required>
+            </div>
+            <button type="submit" class="secondary">Set location</button>
+          </form>
+        </details>
+      </div>
+    </section>
+
+    <!-- COMPASS HERO -->
+    <section class="panel compass-panel">
+      <div class="panel-inner">
+        <h2>Direction to the Kaaba</h2>
+        <p class="lede" style="margin-left:auto;margin-right:auto;">The needle points toward Mecca. Face this heading, measured clockwise from true north.</p>
+
+        <div class="compass-wrap">
+          <svg id="compass" viewBox="0 0 240 240" role="img" aria-labelledby="compass-title">
+            <title id="compass-title">Compass needle pointing toward the Qibla</title>
+            <circle class="compass-face" cx="120" cy="120" r="112"></circle>
+            <circle class="compass-ring" cx="120" cy="120" r="104"></circle>
+            <g id="compass-ticks"></g>
+            <g id="needle">
+              <polygon class="needle-head" points="120,26 128,120 120,108 112,120"></polygon>
+              <polygon class="needle-tail" points="120,120 126,168 120,178 114,168"></polygon>
+              <circle class="needle-hub" cx="120" cy="120" r="7"></circle>
+            </g>
+          </svg>
+        </div>
+
+        <p class="bearing-value"><span id="bearing-value">—</span><sup>°</sup></p>
+        <p class="bearing-sub" id="bearing-sub">Calculating…</p>
+      </div>
+    </section>
+
+    <div class="grid-two">
+      <!-- CALCULATION -->
+      <section class="panel">
+        <div class="panel-inner">
+          <details class="calc" open>
+            <summary>How this is calculated</summary>
+            <div class="calc-steps">
+
+              <div class="calc-step">
+                <p class="step-title">Step 1 — Convert coordinates to radians</p>
+                <p class="step-text">Your location and the Kaaba's location both need to be in radians for spherical trigonometry.</p>
+                <code>φ1 (your lat)  = <span id="v-lat1deg">—</span>°  = <span id="v-lat1rad">—</span> rad
+λ1 (your lon)  = <span id="v-lon1deg">—</span>°  = <span id="v-lon1rad">—</span> rad
+φ2 (Kaaba lat) = 21.4225° = <span id="v-lat2rad">—</span> rad
+λ2 (Kaaba lon) = 39.8262° = <span id="v-lon2rad">—</span> rad</code>
+              </div>
+
+              <div class="calc-step">
+                <p class="step-title">Step 2 — Difference in longitude</p>
+                <code>Δλ = λ2 − λ1 = <span id="v-dlon">—</span> rad</code>
+              </div>
+
+              <div class="calc-step">
+                <p class="step-title">Step 3 — Apply the great-circle bearing formula</p>
+                <p class="step-text">This is the initial bearing formula for spherical trigonometry, using an atan2 function.</p>
+                <code>θ = atan2( sinΔλ·cosφ2 ,  cosφ1·sinφ2 − sinφ1·cosφ2·cosΔλ )
+  = atan2( <span id="v-y">—</span> , <span id="v-x">—</span> )
+  = <span id="v-theta-rad">—</span> rad</code>
+              </div>
+
+              <div class="calc-step">
+                <p class="step-title">Step 4 — Convert to degrees and normalize</p>
+                <code>Qibla = (θ × 180/π + 360) mod 360 = <span id="v-bearing-final">—</span>°</code>
+              </div>
+
+            </div>
+            <div class="calc-result">
+              Straight-line (great-circle) distance to the Kaaba: <strong id="v-distance">—</strong>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- GLOBE -->
+      <section class="panel globe-panel">
+        <div class="panel-inner">
+          <h2>Great-circle path</h2>
+          <p class="lede">The dotted line is the shortest path across the globe to the Kaaba — drag to look around.</p>
+          <div id="globe"></div>
+          <p class="globe-hint">Gold dot: you · Amber star: the Kaaba</p>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="frieze" style="margin: 0 auto 14px; max-width: 200px;"></div>
+    <p>Bearings are calculated with the great-circle (spherical trigonometry) method — the shortest-path direction to the Kaaba, Al-Masjid al-Haram, Mecca (<span class="kaaba-coord">21.4225°N, 39.8262°E</span>) — rather than the less precise straight-line-on-a-flat-map method.</p>
+    <p>Your last location is kept only in a cookie in this browser, so the compass is ready next time you visit. Nothing is sent anywhere.</p>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ================= Constants ================= */
+  var KAABA = { lat: 21.4225, lon: 39.8262 };
+  var DEFAULT_LOCATION = { lat: 19.0760, lon: 72.8777, label: 'Mumbai, India (default)' };
+  var COOKIE_NAME = 'qibla_last_location';
+  var COOKIE_DAYS = 365;
+  var WORLD_ATLAS_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+
+  var globeUpdate = null; // set once the globe is initialised
+
+  /* ================= Small helpers ================= */
+  function toRad(d){ return d * Math.PI / 180; }
+  function toDeg(r){ return r * 180 / Math.PI; }
+  function $(id){ return document.getElementById(id); }
+
+  function setCookie(name, value, days){
+    var d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
+  function getCookie(name){
+    var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  function showStatus(msg, tone){
+    var s = $('status');
+    s.textContent = msg || '';
+    if(tone){ s.setAttribute('data-tone', tone); } else { s.removeAttribute('data-tone'); }
+  }
+
+  var COMPASS_POINTS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  function compassPoint(deg){
+    var idx = Math.round(deg / 22.5) % 16;
+    if(idx < 0){ idx += 16; }
+    return COMPASS_POINTS[idx];
+  }
+
+  /* ================= Qibla math ================= */
+  function calculateQibla(lat1, lon1){
+    var phi1 = toRad(lat1), lam1 = toRad(lon1);
+    var phi2 = toRad(KAABA.lat), lam2 = toRad(KAABA.lon);
+    var dLam = lam2 - lam1;
+    var y = Math.sin(dLam) * Math.cos(phi2);
+    var x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLam);
+    var theta = Math.atan2(y, x);
+    var bearing = (toDeg(theta) + 360) % 360;
+    return { phi1: phi1, lam1: lam1, phi2: phi2, lam2: lam2, dLam: dLam, y: y, x: x, theta: theta, bearing: bearing };
+  }
+
+  function haversineKm(lat1, lon1, lat2, lon2){
+    var R = 6371; // mean Earth radius, km
+    var phi1 = toRad(lat1), phi2 = toRad(lat2);
+    var dPhi = toRad(lat2 - lat1);
+    var dLam = toRad(lon2 - lon1);
+    var a = Math.sin(dPhi/2) * Math.sin(dPhi/2) + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLam/2) * Math.sin(dLam/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  /* ================= Compass face ================= */
+  function buildCompassTicks(){
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var g = $('compass-ticks');
+    var cx = 120, cy = 120;
+    var labels = { 0: 'N', 90: 'E', 180: 'S', 270: 'W' };
+
+    for(var deg = 0; deg < 360; deg += 5){
+      var rad = deg * Math.PI / 180;
+      var major = (deg % 30 === 0);
+      var rOuter = 104;
+      var rInner = major ? 90 : 97;
+      var x1 = cx + rOuter * Math.sin(rad), y1 = cy - rOuter * Math.cos(rad);
+      var x2 = cx + rInner * Math.sin(rad), y2 = cy - rInner * Math.cos(rad);
+      var line = document.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', x1.toFixed(2)); line.setAttribute('y1', y1.toFixed(2));
+      line.setAttribute('x2', x2.toFixed(2)); line.setAttribute('y2', y2.toFixed(2));
+      line.setAttribute('class', major ? 'tick-major' : 'tick-minor');
+      g.appendChild(line);
+
+      if(labels[deg]){
+        var rLabel = 78;
+        var lx = cx + rLabel * Math.sin(rad), ly = cy - rLabel * Math.cos(rad);
+        var text = document.createElementNS(svgNS, 'text');
+        text.setAttribute('x', lx.toFixed(2)); text.setAttribute('y', (ly + 6).toFixed(2));
+        text.setAttribute('class', 'tick-label');
+        text.textContent = labels[deg];
+        g.appendChild(text);
+      }
+    }
+  }
+
+  function setNeedle(bearing, animate){
+    var needle = $('needle');
+    if(!animate){ needle.style.transition = 'none'; }
+    needle.setAttribute('transform', 'rotate(' + bearing.toFixed(2) + ' 120 120)');
+    if(!animate){
+      // force reflow so the "no transition" style is applied before we clear it
+      void needle.getBoundingClientRect();
+      needle.style.transition = '';
+    }
+  }
+
+  /* ================= Rendering ================= */
+  function renderCalculation(loc, calc, distanceKm){
+    $('v-lat1deg').textContent = loc.lat.toFixed(4);
+    $('v-lon1deg').textContent = loc.lon.toFixed(4);
+    $('v-lat1rad').textContent = calc.phi1.toFixed(5);
+    $('v-lon1rad').textContent = calc.lam1.toFixed(5);
+    $('v-lat2rad').textContent = calc.phi2.toFixed(5);
+    $('v-lon2rad').textContent = calc.lam2.toFixed(5);
+    $('v-dlon').textContent = calc.dLam.toFixed(5);
+    $('v-y').textContent = calc.y.toFixed(5);
+    $('v-x').textContent = calc.x.toFixed(5);
+    $('v-theta-rad').textContent = calc.theta.toFixed(5);
+    $('v-bearing-final').textContent = calc.bearing.toFixed(2);
+    $('v-distance').textContent = Math.round(distanceKm).toLocaleString() + ' km';
+  }
+
+  function renderBearing(calc, animate){
+    $('bearing-value').textContent = calc.bearing.toFixed(1);
+    var point = compassPoint(calc.bearing);
+    $('bearing-sub').innerHTML = 'Toward the <strong>' + point + '</strong>, measured clockwise from true north';
+    setNeedle(calc.bearing, animate);
+  }
+
+  function renderLocation(loc){
+    $('location-label').textContent = loc.label;
+    $('location-coords').textContent = loc.lat.toFixed(4) + '°, ' + loc.lon.toFixed(4) + '°';
+  }
+
+  function render(loc, animateNeedle){
+    var calc = calculateQibla(loc.lat, loc.lon);
+    var distanceKm = haversineKm(loc.lat, loc.lon, KAABA.lat, KAABA.lon);
+    renderLocation(loc);
+    renderBearing(calc, animateNeedle);
+    renderCalculation(loc, calc, distanceKm);
+    if(globeUpdate){ globeUpdate(loc); }
+  }
+
+  function persistAndRender(loc){
+    setCookie(COOKIE_NAME, JSON.stringify({ lat: loc.lat, lon: loc.lon, label: loc.label }), COOKIE_DAYS);
+    render(loc, true);
+  }
+
+  /* ================= Location sources ================= */
+  function locateMe(){
+    if(!('geolocation' in navigator)){
+      showStatus('Your browser does not support geolocation — please enter coordinates manually below.', 'error');
+      return;
+    }
+    showStatus('Requesting your location…', 'info');
+    navigator.geolocation.getCurrentPosition(
+      function(pos){
+        var loc = { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Your current location' };
+        showStatus('Location found.', 'success');
+        persistAndRender(loc);
+      },
+      function(err){
+        showStatus('Could not get your location (' + err.message + '). Showing your last known location instead.', 'error');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
+
+  function onManualSubmit(evt){
+    evt.preventDefault();
+    var lat = parseFloat($('manual-lat').value);
+    var lon = parseFloat($('manual-lon').value);
+    if(!isFinite(lat) || lat < -90 || lat > 90 || !isFinite(lon) || lon < -180 || lon > 180){
+      showStatus('Enter a latitude between -90 and 90, and a longitude between -180 and 180.', 'error');
+      return;
+    }
+    showStatus('Location set.', 'success');
+    persistAndRender({ lat: lat, lon: lon, label: 'Manually entered location' });
+  }
+
+  /* ================= Globe (D3 orthographic) ================= */
+  function initGlobe(initialLoc){
+    var container = $('globe');
+    var size = container.clientWidth || 320;
+    var scale = size / 2 - 6;
+    var rotate = [-initialLoc.lon, -initialLoc.lat, 0];
+
+    var svg = d3.select(container).append('svg')
+      .attr('viewBox', '0 0 ' + size + ' ' + size)
+      .attr('width', '100%')
+      .attr('height', '100%');
+
+    var projection = d3.geoOrthographic()
+      .scale(scale)
+      .translate([size / 2, size / 2])
+      .rotate(rotate)
+      .clipAngle(90);
+
+    var path = d3.geoPath(projection);
+    var graticule = d3.geoGraticule();
+
+    svg.append('circle')
+      .attr('class', 'globe-sphere')
+      .attr('cx', size / 2).attr('cy', size / 2).attr('r', scale);
+
+    var graticulePath = svg.append('path')
+      .datum(graticule())
+      .attr('class', 'globe-graticule');
+
+    var landPath = svg.append('path').attr('class', 'globe-land');
+    var arcPath = svg.append('path').attr('class', 'globe-arc');
+
+    var userDot = svg.append('circle').attr('class', 'globe-user-dot').attr('r', 5);
+    userDot.append('title').text('Your location');
+
+    var meccaMark = svg.append('g');
+    meccaMark.append('path')
+      .attr('class', 'globe-mecca-star')
+      .attr('d', 'M0,-7 L2.1,-2.2 L7,-2.2 L3.2,1 L4.5,6.5 L0,3.3 L-4.5,6.5 L-3.2,1 L-7,-2.2 L-2.1,-2.2 Z');
+    meccaMark.append('title').text('Al-Masjid al-Haram, Mecca');
+
+    var land = null;
+    var loc = initialLoc;
+
+    function greatCircleLine(a, b, steps){
+      var interpolate = d3.geoInterpolate(a, b);
+      var coords = [];
+      for(var i = 0; i <= steps; i++){ coords.push(interpolate(i / steps)); }
+      return { type: 'LineString', coordinates: coords };
+    }
+
+    function draw(){
+      graticulePath.attr('d', path);
+      if(land){ landPath.datum(land).attr('d', path); }
+
+      var line = greatCircleLine([loc.lon, loc.lat], [KAABA.lon, KAABA.lat], 100);
+      arcPath.datum(line).attr('d', path);
+
+      var centerPt = [-rotate[0], -rotate[1]];
+      var userVisible = d3.geoDistance(centerPt, [loc.lon, loc.lat]) < Math.PI / 2;
+      var meccaVisible = d3.geoDistance(centerPt, [KAABA.lon, KAABA.lat]) < Math.PI / 2;
+
+      var up = projection([loc.lon, loc.lat]);
+      userDot.attr('cx', up[0]).attr('cy', up[1]).style('display', userVisible ? null : 'none');
+
+      var mp = projection([KAABA.lon, KAABA.lat]);
+      meccaMark.attr('transform', 'translate(' + mp[0] + ',' + mp[1] + ')')
+        .style('display', meccaVisible ? null : 'none');
+    }
+
+    d3.json(WORLD_ATLAS_URL).then(function(world){
+      land = topojson.feature(world, world.objects.land);
+      draw();
+    }).catch(function(){
+      draw(); // still show the arc and markers even if the map data fails to load
+    });
+
+    draw();
+
+    svg.call(d3.drag().on('drag', function(event){
+      var k = 0.28;
+      rotate[0] += event.dx * k;
+      rotate[1] = Math.max(-90, Math.min(90, rotate[1] - event.dy * k));
+      projection.rotate(rotate);
+      draw();
+    }));
+
+    globeUpdate = function(newLoc){
+      loc = newLoc;
+      rotate = [-newLoc.lon, -newLoc.lat, 0];
+      projection.rotate(rotate);
+      draw();
+    };
+  }
+
+  /* ================= Init ================= */
+  function init(){
+    buildCompassTicks();
+
+    var loc = DEFAULT_LOCATION;
+    var saved = getCookie(COOKIE_NAME);
+    if(saved){
+      try{
+        var parsed = JSON.parse(saved);
+        if(isFinite(parsed.lat) && isFinite(parsed.lon)){
+          loc = { lat: parsed.lat, lon: parsed.lon, label: (parsed.label || 'Last saved location') };
+        }
+      }catch(e){ /* ignore malformed cookie */ }
+    }
+
+    render(loc, false);
+    initGlobe(loc);
+
+    $('locate-btn').addEventListener('click', locateMe);
+    $('manual-form').addEventListener('submit', onManualSubmit);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
