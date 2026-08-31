@@ -11,16 +11,19 @@ the browser.
 ## Features
 
 - **Geolocation** — one tap to use your device's current position.
-- **Manual entry** — type in latitude/longitude if you'd rather not share
-  your location, or want to check a different city.
+- **City search** — type a city or place name and pick from matching
+  results (powered by OpenStreetMap Nominatim), no coordinates needed.
+- **Manual entry** — type in latitude/longitude directly as a third option.
 - **Default location** — Mumbai, India, until you set your own.
 - **Cookie memory** — your last location is remembered in a cookie
   (1 year expiry) so the compass is ready next visit. Nothing leaves your
   browser.
 - **Full calculation shown** — every step of the great-circle bearing
   formula, with your actual numbers plugged in.
-- **Compass needle** pointing at the bearing, with the angle from true
-  north front and center.
+- **Compass** with the angle from true north front and center, plus an
+  optional **live mode** that uses your phone's compass sensor so the
+  dial turns with you — line the gold marker up with the fixed pointer
+  at the top and you're facing Qibla.
 - **Interactive globe** (D3, orthographic projection) showing the
   great-circle arc from your location to Mecca — drag to look around.
 
@@ -48,11 +51,25 @@ That's the whole deployment — there's nothing to build or configure.
 
 ## Notes
 
-- **Geolocation needs HTTPS** (or `localhost`). GitHub Pages serves over
-  HTTPS by default, so this works out of the box once deployed. If you test
-  locally, run a local server rather than opening the file directly —
-  e.g. `python3 -m http.server` in this folder, then visit
-  `http://localhost:8000`.
+- **Geolocation and the live compass both need HTTPS** (or `localhost`).
+  GitHub Pages serves over HTTPS by default, so this works out of the box
+  once deployed. If you test locally, run a local server rather than
+  opening the file directly — e.g. `python3 -m http.server` in this
+  folder, then visit `http://localhost:8000`.
+- **Live compass** reads your phone's magnetometer via the
+  DeviceOrientation API. It only works on a device that actually has a
+  compass sensor (most phones; most laptops/desktops don't), and iOS
+  Safari will show its own permission prompt the first time you tap the
+  button. It shows *magnetic* north, which can be a few degrees off from
+  *true* north depending on where you are — the printed angle above the
+  compass is always the precise, calculated figure regardless of the
+  sensor.
+- **City search** calls the public OpenStreetMap Nominatim API directly
+  from the browser — free, no API key, but meant for light personal use
+  (searches only fire when you tap "Search," never as you type). See
+  their [usage policy](https://operations.osmfoundation.org/policies/nominatim/).
+  If you expect heavier traffic, swap in a keyed provider (e.g. LocationIQ,
+  OpenCage, Mapbox) or self-host Nominatim.
 - The Kaaba coordinate used is **21.4225°N, 39.8262°E** (Al-Masjid
   al-Haram, Mecca), a standard reference point.
 - The bearing is computed with the **great-circle (spherical
