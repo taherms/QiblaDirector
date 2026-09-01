@@ -5,8 +5,8 @@ Kaaba from wherever you are, shows the full spherical-trigonometry
 calculation, and draws the shortest path on a draggable globe.
 
 No build step, no backend, no dependencies to install — it's one HTML file
-that loads D3 and a world map from a CDN at runtime. Everything else runs in
-the browser.
+that loads D3, a world map, and Google Fonts (Amiri, Aref Ruqaa, Cairo) from
+a CDN at runtime. Everything else runs in the browser.
 
 ## Features
 
@@ -26,6 +26,10 @@ the browser.
   at the top and you're facing Qibla.
 - **Interactive globe** (D3, orthographic projection) showing the
   great-circle arc from your location to Mecca — drag to look around.
+- **Fatimid-inspired design** — a gold-on-green palette, an Arabic
+  calligraphy header (Aref Ruqaa) with arabesque flourishes, and geometric
+  lattice/frieze motifs evoking Fatimid Cairo and Dawoodi Bohra
+  ornamentation. Fully responsive from small phones to laptop screens.
 
 ## Deploy to GitHub Pages
 

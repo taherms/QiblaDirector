@@ -9,7 +9,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%230E4B3B'/%3E%3Cpath d='M50 18 L58 42 L83 42 L62 57 L70 82 L50 66 L30 82 L38 57 L17 42 L42 42 Z' fill='%23C29A3B'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
   /* ---------- Design tokens ---------- */
@@ -27,6 +27,7 @@
     --line:         rgba(34,28,16,0.14);
     --shadow:       0 10px 30px rgba(14,75,59,0.16);
     --font-display: 'Amiri', 'Georgia', serif;
+    --font-arabic:  'Aref Ruqaa', 'Amiri', serif;
     --font-body:    'Cairo', 'Segoe UI', sans-serif;
   }
 
@@ -57,6 +58,7 @@
     height: 13px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='13' viewBox='0 0 26 13'%3E%3Cpath d='M0 6.5 L6.5 0 L13 6.5 L6.5 13 Z M13 6.5 L19.5 0 L26 6.5 L19.5 13 Z' fill='%23D9AE5C'/%3E%3C/svg%3E");
     background-repeat: repeat-x;
+    background-position: center;
     background-size: 26px 13px;
   }
   .frieze.dark{
@@ -64,30 +66,86 @@
     opacity: 0.55;
   }
 
-  /* ---------- Header ---------- */
+  /* ---------- Header (Fatimid-Cairene arch & lattice motifs, Bohra gold-on-green palette) ---------- */
   header.hero{
-    background: linear-gradient(180deg, var(--green) 0%, var(--green-deep) 100%);
+    position: relative;
+    background:
+      linear-gradient(180deg, var(--green) 0%, var(--green-deep) 100%);
     color: var(--cream);
     text-align: center;
-    padding: 30px 20px 26px;
+    padding: 34px 20px 30px;
+    overflow: hidden;
   }
+  /* faint mashrabiya-style diamond trellis, characteristic of Fatimid Cairo screens */
+  header.hero::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(45deg, rgba(217,174,92,0.045) 25%, transparent 25%, transparent 75%, rgba(217,174,92,0.045) 75%),
+      linear-gradient(45deg, rgba(217,174,92,0.045) 25%, transparent 25%, transparent 75%, rgba(217,174,92,0.045) 75%);
+    background-size: 46px 46px;
+    background-position: 0 0, 23px 23px;
+    -webkit-mask-image: radial-gradient(ellipse 60% 90% at 50% 0%, #000 20%, transparent 75%);
+            mask-image: radial-gradient(ellipse 60% 90% at 50% 0%, #000 20%, transparent 75%);
+  }
+  header.hero .hero-inner{ position: relative; }
   header.hero h1{
     font-family: var(--font-display);
     font-weight: 700;
     font-size: clamp(2rem, 5vw, 2.7rem);
-    margin: 0 0 2px;
+    margin: 0;
     letter-spacing: 0.01em;
     color: var(--gold-light);
     text-shadow: 0 2px 0 rgba(0,0,0,0.25);
   }
-  header.hero .arabic{
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    color: var(--cream);
-    opacity: 0.9;
-    margin: 0 0 12px;
+  .arabic-row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0 16px;
   }
-  header.hero p{
+  .arabic-row .flourish{
+    width: clamp(28px, 6vw, 42px);
+    height: auto;
+    flex: 0 0 auto;
+    stroke: var(--gold-light);
+    opacity: 0.75;
+  }
+  .arabic-row .flourish.flip{ transform: scaleX(-1); }
+  header.hero .arabic{
+    font-family: var(--font-arabic);
+    font-weight: 700;
+    font-size: clamp(1.9rem, 6vw, 2.5rem);
+    line-height: 1;
+    color: var(--gold-light);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.3), 0 0 22px rgba(217,174,92,0.35);
+    margin: 0;
+  }
+  .hero-divider{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 0 16px;
+  }
+  .hero-divider .hd-line{
+    height: 1px;
+    width: clamp(28px, 10vw, 64px);
+    background: linear-gradient(90deg, transparent, var(--gold-light));
+  }
+  .hero-divider .hd-line.right{ background: linear-gradient(90deg, var(--gold-light), transparent); }
+  .hero-divider .hd-diamond{
+    width: 7px;
+    height: 7px;
+    background: var(--gold-light);
+    transform: rotate(45deg);
+    box-shadow: 0 0 0 3px rgba(217,174,92,0.18);
+    flex: 0 0 auto;
+  }
+  header.hero p.tagline{
     max-width: 46ch;
     margin: 0 auto;
     font-size: 0.98rem;
@@ -430,9 +488,26 @@
 
 <div class="frieze"></div>
 <header class="hero">
-  <h1>Qibla Compass</h1>
-  <p class="arabic">القبلة</p>
-  <p>Find the exact direction to the Kaaba in Mecca from anywhere on Earth, with the full calculation shown.</p>
+  <div class="hero-inner">
+    <h1>Qibla Compass</h1>
+    <div class="arabic-row">
+      <svg class="flourish" viewBox="0 0 64 32" fill="none" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 16 C16 4,34 4,40 16 C43 22,52 24,60 16"/>
+        <circle cx="60" cy="16" r="2.2" fill="var(--gold-light)" stroke="none"/>
+      </svg>
+      <p class="arabic">القبلة</p>
+      <svg class="flourish flip" viewBox="0 0 64 32" fill="none" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 16 C16 4,34 4,40 16 C43 22,52 24,60 16"/>
+        <circle cx="60" cy="16" r="2.2" fill="var(--gold-light)" stroke="none"/>
+      </svg>
+    </div>
+    <div class="hero-divider" aria-hidden="true">
+      <span class="hd-line left"></span>
+      <span class="hd-diamond"></span>
+      <span class="hd-line right"></span>
+    </div>
+    <p class="tagline">Find the exact direction to the Kaaba in Mecca from anywhere on Earth, with the full calculation shown.</p>
+  </div>
 </header>
 <div class="frieze dark"></div>
 
@@ -458,7 +533,7 @@
         <div class="city-search">
           <label for="city-input">Or search for a city</label>
           <form id="city-form">
-            <input type="text" id="city-input" placeholder="e.g. Lucknow, India" autocomplete="off">
+            <input type="text" id="city-input" placeholder="e.g. Mumbai, India" autocomplete="off">
             <button type="submit" class="secondary">Search</button>
           </form>
           <ul id="city-results" class="city-results" hidden></ul>
