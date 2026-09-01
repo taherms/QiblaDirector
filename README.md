@@ -4,9 +4,12 @@ A single-page web app that calculates the exact great-circle bearing to the
 Kaaba from wherever you are, shows the full spherical-trigonometry
 calculation, and draws the shortest path on a draggable globe.
 
-No build step, no backend, no dependencies to install — it's one HTML file
-that loads D3, a world map, and Google Fonts (Amiri, Aref Ruqaa, Cairo) from
-a CDN at runtime. Everything else runs in the browser.
+No build step, no backend, no dependencies to install — `index.html` loads
+D3, a world map, and Google Fonts (Amiri, Aref Ruqaa, Cairo) from a CDN at
+runtime. Everything else runs in the browser. It's also an installable app
+(see below) — a `manifest.webmanifest`, a service worker (`sw.js`), and an
+`icons/` folder are the only other files in the repo, and they're what make
+"Add to Home Screen" work on both iOS and Android.
 
 ## Features
 
@@ -30,15 +33,32 @@ a CDN at runtime. Everything else runs in the browser.
   calligraphy header (Aref Ruqaa) with arabesque flourishes, and geometric
   lattice/frieze motifs evoking Fatimid Cairo and Dawoodi Bohra
   ornamentation. Fully responsive from small phones to laptop screens.
+- **Installable app** — "Add to Home Screen" on iOS or Android puts it on
+  the home screen with its own icon, opens full-screen with no browser
+  chrome, and keeps working offline after the first visit (a service
+  worker caches the app shell).
+
+## Install on your phone
+
+**Android (Chrome):** open the site, tap the **⋮** menu, then **Install
+app** (or **Add to Home screen**). Chrome may also offer this automatically
+via a banner or an install icon in the address bar.
+
+**iOS (Safari):** open the site, tap the **Share** icon, then **Add to Home
+Screen**. Safari is the only iOS browser that can do this — Chrome/Firefox
+on iOS can't install web apps.
+
+Either way you get a home-screen icon that opens the compass full-screen,
+without the browser's address bar.
 
 ## Deploy to GitHub Pages
 
 1. Create a new GitHub repository (public, so Pages can serve it for free).
-2. Add `index.html` (and this `README.md` if you like) to the repo root and
-   push:
+2. Add `index.html`, `manifest.webmanifest`, `sw.js`, the `icons/` folder,
+   and this `README.md` to the repo root, then push:
    ```bash
    git init
-   git add index.html README.md
+   git add index.html manifest.webmanifest sw.js icons README.md
    git commit -m "Qibla Compass"
    git branch -M main
    git remote add origin https://github.com/<your-username>/<your-repo>.git
@@ -55,11 +75,18 @@ That's the whole deployment — there's nothing to build or configure.
 
 ## Notes
 
-- **Geolocation and the live compass both need HTTPS** (or `localhost`).
-  GitHub Pages serves over HTTPS by default, so this works out of the box
-  once deployed. If you test locally, run a local server rather than
-  opening the file directly — e.g. `python3 -m http.server` in this
-  folder, then visit `http://localhost:8000`.
+- **Geolocation, the live compass, and the service worker all need HTTPS**
+  (or `localhost`) — service workers (and therefore installability) simply
+  don't register on plain `http://`. GitHub Pages serves over HTTPS by
+  default, so this works out of the box once deployed. If you test locally,
+  run a local server rather than opening the file directly — e.g.
+  `python3 -m http.server` in this folder, then visit
+  `http://localhost:8000`.
+- **Updating the deployed app**: the service worker caches the app shell
+  aggressively so it works offline. After changing `index.html` or the
+  icons, bump `CACHE_NAME` in `sw.js` (e.g. `qibla-compass-v1` →
+  `-v2`) so returning visitors — including anyone who's already installed
+  it — pick up the new version instead of a stale cached copy.
 - **Live compass** reads your phone's magnetometer via the
   DeviceOrientation API. It only works on a device that actually has a
   compass sensor (most phones; most laptops/desktops don't), and iOS

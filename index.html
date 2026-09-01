@@ -2,10 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Qibla Compass — Find the direction to the Kaaba</title>
 <meta name="description" content="Get your exact Qibla direction — the great-circle bearing to the Kaaba in Mecca — with the full spherical-trigonometry calculation and a rotating globe.">
 <meta name="theme-color" content="#0E4B3B">
+
+<!-- Installable web app (Android/Chrome + iOS/Safari "Add to Home Screen") -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Qibla Compass">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%230E4B3B'/%3E%3Cpath d='M50 18 L58 42 L83 42 L62 57 L70 82 L50 66 L30 82 L38 57 L17 42 L42 42 Z' fill='%23C29A3B'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,6 +60,9 @@
     max-width: 80%;
     margin: 0 auto;
     padding: 26px 18px 56px;
+    padding-bottom: max(56px, env(safe-area-inset-bottom));
+    padding-left: max(18px, env(safe-area-inset-left));
+    padding-right: max(18px, env(safe-area-inset-right));
   }
 
   /* ---------- Ornamental frieze ---------- */
@@ -74,6 +86,9 @@
     color: var(--cream);
     text-align: center;
     padding: 34px 20px 30px;
+    /* installed as a standalone app, iOS/Android draw the status bar over
+       the page — pad the header so the title clears the notch/status bar */
+    padding-top: max(34px, env(safe-area-inset-top));
     overflow: hidden;
   }
   /* faint mashrabiya-style diamond trellis, characteristic of Fatimid Cairo screens */
@@ -422,7 +437,7 @@
   .globe-panel .lede{ margin-bottom: 8px; }
   #globe{
     width: 100%;
-    max-width: 80%;
+    /*max-width: 80%;*/
     aspect-ratio: 1 / 1;
     margin: 6px auto 4px;
     cursor: grab;
@@ -1135,6 +1150,15 @@
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+
+  // Registers the offline app-shell cache and satisfies Android/Chrome's
+  // "installable" requirement. Silently no-ops on file:// or unsupported
+  // browsers — the compass still works fine without it.
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){});
+    });
   }
 })();
 </script>
